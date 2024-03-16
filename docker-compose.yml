@@ -1,0 +1,90 @@
+name: gitea
+services:
+  gitea:
+    cpu_shares: 90
+    container_name: gitea
+    depends_on:
+      gitea-db:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: 15859M
+    environment:
+      - DB_HOST=gitea-db:5432
+      - DB_NAME=gitea
+      - DB_PASSWD=gitea
+      - DB_TYPE=postgres
+      - DB_USER=gitea
+      - USER_GID=1000
+      - USER_UID=1000
+    image: gitea/gitea:1.20
+    labels:
+      icon: https://icon.casaos.io/main/all/gitea.png
+    ports:
+      - target: 3000
+        published: "15432"
+        protocol: tcp
+      - target: 22
+        published: "15433"
+        protocol: tcp
+    privileged: true
+    restart: always
+    volumes:
+      - type: bind
+        source: /DATA/AppData/gitea/data
+        target: /data
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+    devices: []
+    cap_add: []
+    command: []
+    networks:
+      - gitea
+  gitea-db:
+    cpu_shares: 90
+    container_name: postgresql-gitea
+    deploy:
+      resources:
+        limits:
+          memory: 15859M
+    environment:
+      - POSTGRES_DB=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_USER=gitea
+    image: postgres:14.5
+    labels:
+      icon: https://icon.casaos.io/main/all/gitea.png
+    ports:
+      - target: 5432
+        published: "5432"
+        protocol: tcp
+    privileged: true
+    restart: always
+    volumes:
+      - type: bind
+        source: /DATA/AppData/gitea/db-data
+        target: /var/lib/postgresql/data
+    devices: []
+    cap_add: []
+    command: []
+    networks:
+      - gitea
+networks:
+  gitea:
+    name: gitea
+x-casaos:
+  author: self
+  category: self
+  hostname: ""
+  icon: https://icon.casaos.io/main/all/gitea.png
+  index: /
+  port_map: "15432"
+  scheme: http
+  store_app_id: gitea
+  title:
+    custom: Gitea
